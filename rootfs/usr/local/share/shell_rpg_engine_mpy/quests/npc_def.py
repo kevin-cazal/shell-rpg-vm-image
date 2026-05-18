@@ -21,6 +21,25 @@ import ui
 base = "/tmp/game_map"
 
 
+def _install_quiet():
+    return os.environ.get("INSTALL_QUIET", "") not in ("", "0", "false")
+
+
+def _progress():
+    if _install_quiet():
+        sys.stdout.write(".")
+        sys.stdout.flush()
+
+
+def _map_path(base_dir, path):
+    """Resolve under base_dir; create_zone paths are already absolute under base."""
+    base_dir = os.path.normpath(base_dir)
+    path = os.path.normpath(path)
+    if path == base_dir or path.startswith(base_dir + "/"):
+        return path
+    return os.path.join(base_dir, path)
+
+
 def find_parent_in_dict(obj, key, value):
     """Recursively find parent dicts that contain a specific key/value."""
     results = []
@@ -399,32 +418,29 @@ def create_zone(name, map_data):
     global post_ops
     global total_quests
     for npcs in map_data.get("npcs", []):
-        print(f"Creating NPC: {npcs['name']} in {name}")
         npc_path = os.path.join(name, compat.capitalize(npcs['name']) + ".npc")
         total_quests += len(npcs.get("quests", []))
         with open(npc_path, 'w') as npc_file:
             json.dump(npcs, npc_file)
-        print(f"Created NPC file at {npc_path}")
+        _progress()
     for obj in map_data.get("objects", []):
-        print(f"Creating object: {obj['name']} in {name}")
         if (obj['name'] == "tresor.tar"):
             obj_path = os.path.join(name, f"{obj['name'].lower()}")
         else:
             obj_path = os.path.join(name, f"{obj['name'].lower()}.obj")
         with open(obj_path, 'w') as obj_file:
             obj_file.write(obj['content'])
-        print(f"Created object file at {obj_path}")
+        _progress()
     for subzone in map_data.get("subzones", []):
         if subzone.get("name", None) is None:
             continue
-        print(f"Creating subzone: {subzone['name']} in {name}")
         subzone_path = os.path.join(name, subzone['name'])
         symlink = subzone.get("symlink_to", None)
         if symlink:
             symlinks.append((subzone_path, symlink))
         else:
-            print(f"Creating directory for subzone {subzone['name']}")
             os.makedirs(subzone_path, exist_ok=True)
+            _progress()
             post_creation = subzone.get("post_creation", None)
             if (post_creation):
                 post_ops.append((post_creation, subzone_path))
@@ -433,29 +449,32 @@ def create_zone(name, map_data):
 
 def create_symlinks(base_dir):
     for link, target in symlinks:
-        link_path = os.path.join(base_dir, link)
-        if target.startswith(base_dir):
-            target_path = target
-        else:
-            target_path = os.path.join(base_dir, target)
+        link_path = _map_path(base_dir, link)
+        target_path = _map_path(base_dir, target)
         if not os.path.exists(target_path):
-            print(f"Target {target_path} does not exist for symlink {link_path}, skipping.")
+            if not _install_quiet():
+                print(
+                    f"Target {target_path} does not exist for symlink {link_path}, skipping.",
+                    file=sys.stderr,
+                )
             continue
         try:
             os.symlink(target_path, link_path)
-            print(f"Created symlink: {link_path} -> {target_path}")
+            _progress()
         except FileExistsError:
-            print(f"Symlink {link_path} already exists, skipping.")
+            _progress()
         except Exception as e:
-            print(f"Error creating symlink {link_path}: {e}")
+            if not _install_quiet():
+                print(f"Error creating symlink {link_path}: {e}", file=sys.stderr)
 
 def execute_post_ops():
     for func, arg in post_ops:
         try:
             func(arg)
-            print(f"Executed post operation {func} on {arg}")
+            _progress()
         except Exception as e:
-            print(f"Error executing post operation on {arg}: {e}")
+            if not _install_quiet():
+                print(f"Error executing post operation on {arg}: {e}", file=sys.stderr)
 
 def dump_map(json_data):
     with open("game_map.json", 'w') as f:
@@ -471,5 +490,8 @@ if __name__ == "__main__":
     create_zone(base_dir, map.MAP)
     create_symlinks(base_dir)
     execute_post_ops()
-    print(f"Game map created at {base_dir} with total quests: {total_quests}")
+    if _install_quiet():
+        sys.stdout.write("\n")
+    else:
+        print(f"Game map created at {base_dir} with total quests: {total_quests}")
 

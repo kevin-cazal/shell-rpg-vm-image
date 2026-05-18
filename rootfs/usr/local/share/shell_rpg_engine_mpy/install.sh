@@ -1,24 +1,31 @@
 #!/bin/bash
 ENGINE=$(basename -s .py "$1")
 ENGINE="engine"
-echo "Please wait while setting up the environment..."
+dot() { printf '.'; }
+
+printf 'Setting up the game'
+export INSTALL_QUIET=1
+
 mkdir -p /tmp/bin
 mkdir -p /tmp/bin/quests
-# Runtime quest modules only (map.py/all.py used at build time from this directory).
 for q in config.py lake_data.py npc_def.py path.py translation_tab.py treasure_base64.py; do
-    cp "quests/$q" /tmp/bin/quests/
+	cp "quests/$q" /tmp/bin/quests/
+	dot
 done
-cp "$ENGINE.py" compat.py quest_registry.py ui.py /tmp/bin/
+for f in "$ENGINE.py" compat.py quest_registry.py ui.py; do
+	cp "$f" /tmp/bin/
+	dot
+done
 for i in $(micropython -c "import sys; sys.path.insert(0,'/tmp/bin'); sys.path.insert(0,'/tmp/bin/quests'); import engine; print(*engine.ACTIONS.keys())"); do
-    bin=/tmp/bin/$i
-    unlink "$bin" 2>/dev/null
-    ln -sf "$ENGINE.py" "$bin"
-    chmod +x "$bin"
+	bin=/tmp/bin/$i
+	unlink "$bin" 2>/dev/null
+	ln -sf "$ENGINE.py" "$bin"
+	chmod +x "$bin"
+	dot
 done
 
 export PATH=/tmp/bin:$PATH
 
-# Reset map (fedex1 may chmod zones 600 or rename .passage_secret → tunnel).
 rm -rf /tmp/game_map
 
 micropython quests/npc_def.py
@@ -40,8 +47,12 @@ cat > /tmp/player.json << EOF
     "stories": []
 }
 EOF
+dot
 
 /usr/local/share/shell_rpg_engine_mpy/vm-bridge-player-json.sh 2>/dev/null || true
+dot
 
 . "$(dirname "$0")/ram-tools.sh"
 ram_install_toolchain
+
+printf '\n'
