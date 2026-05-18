@@ -17,11 +17,11 @@ Zone backgrounds are **not** in this repo — see `assets/zone-bg/` in [shell-rp
 sudo ./build.sh
 ```
 
-Output: `alpine-bios-${IMAGE_SIZE}.img` in the repo directory (default `IMAGE_SIZE=256M` on branch `feature/256m-disk-ram`; use `IMAGE_SIZE=512M` for the classic size).
+Output: `alpine-bios-${IMAGE_SIZE}.img` in the repo directory (default **`IMAGE_SIZE=256M`**; use `IMAGE_SIZE=512M` for the legacy size).
 
-### 256 MiB experiment (`feature/256m-disk-ram`)
+### 256 MiB profile (default)
 
-- Disk: `IMAGE_SIZE=256M` (default on this branch)
+- Disk: `IMAGE_SIZE=256M` (default in `build.sh`)
 - Guest RAM in the browser: set `VITE_VM_MEMORY_MB=256` when running the web UI (see `dev-run.sh`)
 
 ```sh
