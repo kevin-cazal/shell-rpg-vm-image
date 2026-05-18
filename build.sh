@@ -2,7 +2,8 @@
 set -e
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-IMAGE="${IMAGE:-$SCRIPT_DIR/alpine-bios-$(date +%Y-%m-%d).img}"
+IMAGE_SIZE="${IMAGE_SIZE:-256M}"
+IMAGE="${IMAGE:-$SCRIPT_DIR/alpine-bios-${IMAGE_SIZE}.img}"
 AMVI="${ALPINE_MAKE_VM_IMAGE:-$SCRIPT_DIR/../alpine-make-vm-image/alpine-make-vm-image}"
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -33,7 +34,7 @@ fi
 	--arch x86 \
 	--serial-console \
 	--image-format raw \
-	--image-size 512M \
+	--image-size "$IMAGE_SIZE" \
 	--repositories-file "$SCRIPT_DIR/repositories" \
 	--packages "$(cat "$SCRIPT_DIR/packages")" \
 	--fs-skel-dir "$SCRIPT_DIR/rootfs" \

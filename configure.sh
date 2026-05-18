@@ -95,7 +95,7 @@ step 'RAM-backed game and filesystem tuning'
 if [ -f /etc/fstab ]; then
 	sed -i 's/\trelatime\t/\tnoatime\t/' /etc/fstab
 	if ! grep -qE '[[:space:]]/tmp[[:space:]]' /etc/fstab; then
-		printf '%s\n' 'tmpfs	/tmp	tmpfs	mode=1777,size=64M	0	0' >> /etc/fstab
+		printf '%s\n' 'tmpfs	/tmp	tmpfs	mode=1777,size=32M	0	0' >> /etc/fstab
 	fi
 fi
 chmod +x /etc/init.d/game-ram-setup
