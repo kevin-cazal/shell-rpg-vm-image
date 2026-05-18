@@ -2,7 +2,7 @@
 
 Alpine rootfs and chroot setup for the Shell RPG guest (serial / v86 only — no X stack).
 
-Zone background PNGs for the **browser** live in `zone-bg/` (not in the disk image). The guest only sends filenames over vm-bridge (`hvc1`); [shell-rpg](https://github.com/kevin-cazal/shell-rpg) `npm run prepare` copies them into the web runner.
+Zone backgrounds are **not** in this repo — see `assets/zone-bg/` in [shell-rpg](https://github.com/kevin-cazal/shell-rpg). The guest only sends PNG filenames over vm-bridge (`hvc1`).
 
 ## Prerequisites
 
