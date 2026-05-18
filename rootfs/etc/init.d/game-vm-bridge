@@ -1,0 +1,35 @@
+#!/sbin/openrc-run
+# Host→guest vm-bridge reader on /dev/hvc1 (guest→host uses vm-bridge-send).
+
+depend() {
+	need localmount
+	after game-ram-setup
+}
+
+_hvc1_guest_access() {
+	[ -c /dev/hvc1 ] || return 1
+	chown root:tty /dev/hvc1 2>/dev/null || true
+	chmod 660 /dev/hvc1 2>/dev/null || true
+}
+
+start() {
+	ebegin "VM bridge daemon (hvc1)"
+
+	if [ ! -c /dev/hvc1 ]; then
+		ewarn "/dev/hvc1 not present (v86 web only)"
+		eend 0
+		return 0
+	fi
+
+	_hvc1_guest_access
+
+	start-stop-daemon --start --background --name game-vm-bridge \
+		--user user42 --exec /usr/local/sbin/vm-bridge-daemon
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping VM bridge daemon"
+	start-stop-daemon --stop --name game-vm-bridge --retry 2
+	eend $?
+}

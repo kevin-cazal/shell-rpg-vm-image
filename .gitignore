@@ -1,0 +1,5 @@
+*.img
+*.raw
+*.qcow2
+__pycache__/
+*.py[cod]

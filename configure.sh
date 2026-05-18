@@ -1,0 +1,110 @@
+#!/bin/sh
+
+_step_counter=0
+step() {
+	_step_counter=$(( _step_counter + 1 ))
+	printf '\n\033[1;36m%d) %s\033[0m\n' $_step_counter "$@" >&2
+}
+
+uname -a
+
+step 'Set up timezone'
+setup-timezone -z Europe/Paris
+
+step 'Set up default keymap'
+setup-keymap fr fr
+
+step 'Set up networking'
+cat > /etc/network/interfaces <<-EOF
+	iface lo inet loopback
+	iface eth0 inet dhcp
+EOF
+ln -s networking /etc/init.d/net.lo
+ln -s networking /etc/init.d/net.eth0
+
+step 'Adjust rc.conf'
+sed -Ei \
+	-e 's/^[# ](rc_depend_strict)=.*/\1=NO/' \
+	-e 's/^[# ](rc_logger)=.*/\1=YES/' \
+	-e 's/^[# ](unicode)=.*/\1=YES/' \
+	/etc/rc.conf
+
+step 'Enable services'
+rc-update add chronyd default
+rc-update add net.eth0 default
+rc-update add net.lo boot
+rc-update add termencoding boot
+rc-update add udev-trigger boot
+rc-update add udev-settle boot
+rc-update add udev-postmount boot
+
+step 'Create non-root user'
+adduser -D -s /bin/bash -h /home/user42 user42
+addgroup user42 video
+addgroup user42 input
+addgroup user42 tty
+chown -R user42:user42 /home/user42/
+
+step 'Setup autologin'
+# hvc0: virtio console (v86 web). ttyS0: serial automation.
+sed -i 's|^ttyS0::.*|ttyS0::respawn:/sbin/agetty --autologin user42 -s ttyS0 115200 xterm|' /etc/inittab
+grep -q '^hvc0::' /etc/inittab || \
+	echo 'hvc0::respawn:/sbin/agetty --autologin user42 -s hvc0 115200 xterm' >> /etc/inittab
+sed 's@tty1::respawn:.*@@g' -i /etc/inittab
+
+# hvc0 last so /dev/console and OpenRC logs go to virtio console.
+sed -Ei \
+	-e 's|^[# ]*(default_kernel_opts)=.*|\1="console=tty0 console=hvc0"|' \
+	/etc/update-extlinux.conf
+update-extlinux
+
+step 'Install game engine'
+echo "dev.tty.legacy_tiocsti = 1" > /etc/sysctl.d/local.conf
+sysctl --system 2>/dev/null || sysctl -p /etc/sysctl.d/local.conf 2>/dev/null || true
+if [ ! -x /usr/local/bin/rpg-inject-tty ]; then
+	echo "rpg-inject-tty missing: run rpg-inject-tty/build.sh before building the image" >&2
+	exit 1
+fi
+chmod +x /usr/local/share/shell_rpg_engine_mpy/install.sh
+chmod +x /usr/local/share/shell_rpg_engine_mpy/vm-bridge-player-json.sh
+su user42 -c 'cd /usr/local/share/shell_rpg_engine_mpy && ./install.sh engine.py'
+
+step 'Processing background images'
+mkdir -p /usr/local/share/bg
+for i in /usr/local/share/original_bg/*; do
+	[ -f "$i" ] || continue
+	magick "$i" -resize 320x240 -quality 95 -depth 8 \
+		-fill black -colorize 50% "/usr/local/share/bg/$(basename "$i")"
+done
+magick -size 320x240 xc:'#0a0a0a' /usr/local/share/bg/default.png
+rm -rf /usr/local/share/original_bg/
+
+step 'Refresh fontconfig cache'
+fc-cache -f /usr/share/fonts/dejavu /usr/share/fonts/twemoji 2>/dev/null || true
+
+step 'Remove build-only packages'
+apk del --purge imagemagick
+rm -rf /var/cache/apk/*
+
+cat > /etc/doas.conf <<-EOF
+	permit nopass user42 as root cmd /sbin/loadkmap
+	permit nopass user42 as root cmd /sbin/setup-keymap
+EOF
+
+step 'RAM-backed game and filesystem tuning'
+if [ -f /etc/fstab ]; then
+	sed -i 's/\trelatime\t/\tnoatime\t/' /etc/fstab
+	if ! grep -qE '[[:space:]]/tmp[[:space:]]' /etc/fstab; then
+		printf '%s\n' 'tmpfs	/tmp	tmpfs	mode=1777,size=64M	0	0' >> /etc/fstab
+	fi
+fi
+chmod +x /etc/init.d/game-ram-setup
+rc-update add game-ram-setup boot
+chmod 4755 /usr/local/bin/vm-bridge-send
+chmod 4755 /usr/local/bin/vm-bridge-raw
+chmod 4755 /usr/local/bin/vm-bridge-read
+chmod 4755 /usr/local/bin/vm-bridge-listen
+chmod +x /usr/local/sbin/vm-bridge-daemon
+chmod +x /etc/init.d/game-vm-bridge
+rc-update add game-vm-bridge default
+rm -rf /tmp/game_map /tmp/bin /tmp/player.json /tmp/bg /tmp/lib /tmp/usr

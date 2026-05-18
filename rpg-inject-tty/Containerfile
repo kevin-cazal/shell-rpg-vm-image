@@ -1,0 +1,9 @@
+FROM i386/alpine:3.23
+
+RUN apk add --no-cache build-base
+
+WORKDIR /src
+COPY rpg-inject-tty.c .
+
+RUN mkdir -p /out \
+	&& gcc -O2 -Wall -Wextra -s -static -o /out/rpg-inject-tty rpg-inject-tty.c

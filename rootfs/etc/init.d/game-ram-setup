@@ -1,0 +1,41 @@
+#!/sbin/openrc-run
+# Populate Shell RPG runtime under tmpfs (/tmp) at boot.
+
+RAM_TOOLS=/usr/local/share/shell_rpg_engine_mpy/ram-tools.sh
+
+depend() {
+	need localmount
+	after localmount
+}
+
+start() {
+	ebegin "Shell RPG RAM setup"
+
+	if [ -d /usr/local/share/bg ]; then
+		mkdir -p /tmp/bg
+		cp -r /usr/local/share/bg/. /tmp/bg/
+	fi
+
+	rm -rf /tmp/game_map /tmp/bin /tmp/player.json /tmp/bg /tmp/lib /tmp/usr
+
+	if [ -x /usr/local/share/shell_rpg_engine_mpy/install.sh ]; then
+		su user42 -s /bin/bash -c \
+			'cd /usr/local/share/shell_rpg_engine_mpy && ./install.sh engine.py' \
+			|| {
+				ewend 1 "install.sh failed"
+				return 1
+			}
+	fi
+
+	if [ -r "$RAM_TOOLS" ]; then
+		# shellcheck disable=SC1090
+		. "$RAM_TOOLS"
+		ram_install_toolchain
+	fi
+
+	eend 0
+}
+
+stop() {
+	need_stop=no
+}

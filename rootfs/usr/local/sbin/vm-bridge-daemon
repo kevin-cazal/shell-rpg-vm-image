@@ -1,0 +1,30 @@
+#!/bin/sh
+# Read host→guest traffic on /dev/hvc1 (raw → line framing in vm-bridge-listen).
+# Guest→host: vm-bridge-send / vm-bridge-raw.
+
+VM_BRIDGE_LOG=${VM_BRIDGE_LOG:-/tmp/vm-bridge.log}
+VM_BRIDGE_RC=${VM_BRIDGE_RC:-/etc/vm-bridge.rc}
+
+vm_bridge_handle_host_line() {
+	case "$1" in
+		""|'#'*) return 0 ;;
+	esac
+	printf '%s\n' "$1" >>"$VM_BRIDGE_LOG"
+	if [ -f "$VM_BRIDGE_RC" ]; then
+		# shellcheck disable=SC1090
+		. "$VM_BRIDGE_RC"
+	fi
+}
+
+_i=0
+while [ ! -c /dev/hvc1 ] && [ "$_i" -lt 120 ]; do
+	sleep 1
+	_i=$((_i + 1))
+done
+[ -c /dev/hvc1 ] || exit 1
+
+while true; do
+	/usr/local/bin/vm-bridge-listen | while IFS= read -r _line; do
+		vm_bridge_handle_host_line "$_line"
+	done
+done

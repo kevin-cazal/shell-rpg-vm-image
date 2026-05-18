@@ -1,0 +1,12 @@
+FROM i386/alpine:3.23
+
+RUN apk add --no-cache build-base
+
+WORKDIR /src
+COPY vm-bridge-send.c vm-bridge-raw.c vm-bridge-read.c vm-bridge-listen.c vm-bridge-debug.h .
+
+RUN mkdir -p /out \
+	&& gcc -O2 -Wall -Wextra -s -static -o /out/vm-bridge-send vm-bridge-send.c \
+	&& gcc -O2 -Wall -Wextra -s -static -o /out/vm-bridge-raw vm-bridge-raw.c \
+	&& gcc -O2 -Wall -Wextra -s -static -o /out/vm-bridge-read vm-bridge-read.c \
+	&& gcc -O2 -Wall -Wextra -s -static -o /out/vm-bridge-listen vm-bridge-listen.c
