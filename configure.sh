@@ -1,4 +1,5 @@
 #!/bin/sh
+set -eu
 
 _step_counter=0
 step() {
@@ -14,13 +15,11 @@ setup-timezone -z Europe/Paris
 step 'Set up default keymap'
 setup-keymap fr fr
 
-step 'Set up networking'
+step 'Set up loopback only'
 cat > /etc/network/interfaces <<-EOF
 	iface lo inet loopback
-	iface eth0 inet dhcp
 EOF
 ln -s networking /etc/init.d/net.lo
-ln -s networking /etc/init.d/net.eth0
 
 step 'Adjust rc.conf'
 sed -Ei \
@@ -30,8 +29,6 @@ sed -Ei \
 	/etc/rc.conf
 
 step 'Enable services'
-rc-update add chronyd default
-rc-update add net.eth0 default
 rc-update add net.lo boot
 rc-update add termencoding boot
 rc-update add udev-trigger boot
@@ -58,32 +55,17 @@ sed -Ei \
 	/etc/update-extlinux.conf
 update-extlinux
 
-step 'Install game engine'
+step 'Game engine image setup'
 echo "dev.tty.legacy_tiocsti = 1" > /etc/sysctl.d/local.conf
-sysctl --system 2>/dev/null || sysctl -p /etc/sysctl.d/local.conf 2>/dev/null || true
 if [ ! -x /usr/local/bin/rpg-inject-tty ]; then
 	echo "rpg-inject-tty missing: run rpg-inject-tty/build.sh before building the image" >&2
 	exit 1
 fi
 chmod +x /usr/local/share/shell_rpg_engine_mpy/install.sh
 chmod +x /usr/local/share/shell_rpg_engine_mpy/vm-bridge-player-json.sh
-su user42 -c 'cd /usr/local/share/shell_rpg_engine_mpy && ./install.sh engine.py'
+# install.sh runs at boot via game-ram-setup (RAM-backed /tmp/game_map).
+# Zone backgrounds and fonts live in the web runner (hvc0/xterm), not on disk.
 
-step 'Processing background images'
-mkdir -p /usr/local/share/bg
-for i in /usr/local/share/original_bg/*; do
-	[ -f "$i" ] || continue
-	magick "$i" -resize 320x240 -quality 95 -depth 8 \
-		-fill black -colorize 50% "/usr/local/share/bg/$(basename "$i")"
-done
-magick -size 320x240 xc:'#0a0a0a' /usr/local/share/bg/default.png
-rm -rf /usr/local/share/original_bg/
-
-step 'Refresh fontconfig cache'
-fc-cache -f /usr/share/fonts/dejavu /usr/share/fonts/twemoji 2>/dev/null || true
-
-step 'Remove build-only packages'
-apk del --purge imagemagick
 rm -rf /var/cache/apk/*
 
 cat > /etc/doas.conf <<-EOF
@@ -95,7 +77,7 @@ step 'RAM-backed game and filesystem tuning'
 if [ -f /etc/fstab ]; then
 	sed -i 's/\trelatime\t/\tnoatime\t/' /etc/fstab
 	if ! grep -qE '[[:space:]]/tmp[[:space:]]' /etc/fstab; then
-		printf '%s\n' 'tmpfs	/tmp	tmpfs	mode=1777,size=64M	0	0' >> /etc/fstab
+		printf '%s\n' 'tmpfs	/tmp	tmpfs	mode=1777,size=32M	0	0' >> /etc/fstab
 	fi
 fi
 chmod +x /etc/init.d/game-ram-setup
@@ -107,4 +89,4 @@ chmod 4755 /usr/local/bin/vm-bridge-listen
 chmod +x /usr/local/sbin/vm-bridge-daemon
 chmod +x /etc/init.d/game-vm-bridge
 rc-update add game-vm-bridge default
-rm -rf /tmp/game_map /tmp/bin /tmp/player.json /tmp/bg /tmp/lib /tmp/usr
+rm -rf /tmp/game_map /tmp/bin /tmp/player.json /tmp/lib /tmp/usr

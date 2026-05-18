@@ -7,7 +7,4 @@ micropython
 agetty
 linux-firmware-none
 dialog
-imagemagick
-font-dejavu
-font-twemoji
 doas

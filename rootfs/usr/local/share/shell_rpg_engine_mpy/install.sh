@@ -45,7 +45,3 @@ EOF
 
 . "$(dirname "$0")/ram-tools.sh"
 ram_install_toolchain
-if [ -d /usr/local/share/bg ]; then
-    mkdir -p /tmp/bg
-    cp -r /usr/local/share/bg/. /tmp/bg/
-fi

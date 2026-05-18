@@ -1,4 +1,4 @@
-# Zone → background PNG (shared by mlterm escapes and v86 vm-bridge).
+# Zone → background filename for the browser host (vm-bridge on hvc1).
 
 _game_zone_bg_file() {
 	case $(pwd) in
@@ -18,14 +18,6 @@ _game_zone_bg_file() {
 		/tmp/game_map/village) echo village.png ;;
 		/tmp/game_map) echo root.png ;;
 		*) echo "" ;;
-	esac
-}
-
-_game_cd_set_bg_mlterm() {
-	_bg=$(_game_zone_bg_file)
-	case "$_bg" in
-		"") printf '\e]20;;\a' ;;
-		*) printf '\e]20;/tmp/bg/%s;100x100+50+50\a' "$_bg" ;;
 	esac
 }
 

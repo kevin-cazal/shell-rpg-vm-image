@@ -1,9 +1,21 @@
 #!/bin/sh
-set -e
+set -eu
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-IMAGE="${IMAGE:-$SCRIPT_DIR/alpine-bios-$(date +%Y-%m-%d).img}"
+IMAGE_SIZE="${IMAGE_SIZE:-256M}"
+IMAGE="${IMAGE:-$SCRIPT_DIR/alpine-bios-${IMAGE_SIZE}.img}"
 AMVI="${ALPINE_MAKE_VM_IMAGE:-$SCRIPT_DIR/../alpine-make-vm-image/alpine-make-vm-image}"
+
+on_build_exit() {
+	ec=$?
+	trap - EXIT
+	if [ "$ec" -ne 0 ] && [ -f "$IMAGE" ]; then
+		echo "Build failed (exit $ec); removing incomplete image: $IMAGE" >&2
+		rm -f "$IMAGE"
+	fi
+	exit "$ec"
+}
+trap on_build_exit EXIT
 
 if [ "$(id -u)" -ne 0 ]; then
 	echo "Re-run as root (e.g. sudo $0)" >&2
@@ -29,11 +41,13 @@ fi
 "$SCRIPT_DIR/rpg-inject-tty/build.sh"
 "$SCRIPT_DIR/vm-bridge-send/build.sh"
 
+rm -f "$IMAGE"
+
 "$AMVI" \
 	--arch x86 \
 	--serial-console \
 	--image-format raw \
-	--image-size 512M \
+	--image-size "$IMAGE_SIZE" \
 	--repositories-file "$SCRIPT_DIR/repositories" \
 	--packages "$(cat "$SCRIPT_DIR/packages")" \
 	--fs-skel-dir "$SCRIPT_DIR/rootfs" \
