@@ -58,16 +58,15 @@ sed -Ei \
 	/etc/update-extlinux.conf
 update-extlinux
 
-step 'Install game engine'
+step 'Game engine image setup'
 echo "dev.tty.legacy_tiocsti = 1" > /etc/sysctl.d/local.conf
-sysctl --system 2>/dev/null || sysctl -p /etc/sysctl.d/local.conf 2>/dev/null || true
 if [ ! -x /usr/local/bin/rpg-inject-tty ]; then
 	echo "rpg-inject-tty missing: run rpg-inject-tty/build.sh before building the image" >&2
 	exit 1
 fi
 chmod +x /usr/local/share/shell_rpg_engine_mpy/install.sh
 chmod +x /usr/local/share/shell_rpg_engine_mpy/vm-bridge-player-json.sh
-su user42 -c 'cd /usr/local/share/shell_rpg_engine_mpy && ./install.sh engine.py'
+# install.sh runs at boot via game-ram-setup (RAM-backed /tmp/game_map).
 
 step 'Processing background images'
 mkdir -p /usr/local/share/bg
