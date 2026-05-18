@@ -1,4 +1,5 @@
 #!/bin/sh
+set -eu
 
 _step_counter=0
 step() {
