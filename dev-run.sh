@@ -16,7 +16,11 @@ fi
 
 if [ ! -f "$IMAGE" ] || [ "${FORCE_BUILD:-}" = 1 ]; then
 	echo "Building VM image ($IMAGE_SIZE disk) → $IMAGE"
-	sudo -E "$SCRIPT_DIR/build.sh"
+	if command -v doas >/dev/null 2>&1; then
+		doas env IMAGE_SIZE="$IMAGE_SIZE" IMAGE="$IMAGE" "$SCRIPT_DIR/build.sh"
+	else
+		sudo -E "$SCRIPT_DIR/build.sh"
+	fi
 fi
 
 ln -sf "$IMAGE" "$SHELL_RPG/alpine-bios-256M.img"

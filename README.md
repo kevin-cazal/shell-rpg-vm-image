@@ -14,7 +14,7 @@ Zone backgrounds are **not** in this repo — see `assets/zone-bg/` in [shell-rp
 ```sh
 ./rpg-inject-tty/build.sh
 ./vm-bridge-send/build.sh
-sudo ./build.sh
+doas ./build.sh
 ```
 
 Output: `alpine-bios-${IMAGE_SIZE}.img` in the repo directory (default **`IMAGE_SIZE=256M`**; use `IMAGE_SIZE=512M` for the legacy size).

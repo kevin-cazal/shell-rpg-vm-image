@@ -18,7 +18,7 @@ on_build_exit() {
 trap on_build_exit EXIT
 
 if [ "$(id -u)" -ne 0 ]; then
-	echo "Re-run as root (e.g. sudo $0)" >&2
+	echo "Re-run as root (e.g. doas $0 or sudo $0)" >&2
 	exit 1
 fi
 
