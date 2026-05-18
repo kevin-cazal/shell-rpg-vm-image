@@ -59,6 +59,7 @@ jobs:
           V86_STATE_CONSOLE_ROWS: "24"
         run: |
           npm ci
+          npm run prepare
           npm run build-bundle -- \
             --disk "$GITHUB_WORKSPACE/alpine-bios-256M.img" \
             --state "$GITHUB_WORKSPACE/alpine-bios-256M.v86state" \
