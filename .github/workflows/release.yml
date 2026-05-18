@@ -59,7 +59,13 @@ jobs:
           V86_STATE_CONSOLE_ROWS: "24"
         run: |
           npm ci
-          npm run prepare
+          mkdir -p public/assets
+          if [ -f node_modules/v86/bios/seabios.bin ]; then
+            cp -f node_modules/v86/bios/seabios.bin node_modules/v86/bios/vgabios.bin public/assets/
+          else
+            curl -fsSL -o public/assets/seabios.bin https://raw.githubusercontent.com/copy/v86/master/bios/seabios.bin
+            curl -fsSL -o public/assets/vgabios.bin https://raw.githubusercontent.com/copy/v86/master/bios/vgabios.bin
+          fi
           npm run build-bundle -- \
             --disk "$GITHUB_WORKSPACE/alpine-bios-256M.img" \
             --state "$GITHUB_WORKSPACE/alpine-bios-256M.v86state" \
