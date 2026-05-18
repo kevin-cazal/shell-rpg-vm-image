@@ -65,11 +65,6 @@ chmod +x /usr/local/share/shell_rpg_engine_mpy/vm-bridge-player-json.sh
 
 rm -rf /var/cache/apk/*
 
-cat > /etc/doas.conf <<-EOF
-	permit nopass user42 as root cmd /sbin/loadkmap
-	permit nopass user42 as root cmd /sbin/setup-keymap
-EOF
-
 step 'RAM-backed game and filesystem tuning'
 if [ -f /etc/fstab ]; then
 	sed -i 's/\trelatime\t/\tnoatime\t/' /etc/fstab
