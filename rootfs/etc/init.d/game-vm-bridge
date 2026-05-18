@@ -2,7 +2,7 @@
 # Host→guest vm-bridge reader on /dev/hvc1 (guest→host uses vm-bridge-send).
 
 depend() {
-	need localmount
+	need localmount game-ram-setup
 	after game-ram-setup
 }
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 ENGINE=$(basename -s .py "$1")
 ENGINE="engine"
 dot() { printf '.'; }
@@ -18,7 +19,7 @@ for f in "$ENGINE.py" compat.py quest_registry.py ui.py; do
 done
 for i in $(micropython -c "import sys; sys.path.insert(0,'/tmp/bin'); sys.path.insert(0,'/tmp/bin/quests'); import engine; print(*engine.ACTIONS.keys())"); do
 	bin=/tmp/bin/$i
-	unlink "$bin" 2>/dev/null
+	rm -f "$bin"
 	ln -sf "$ENGINE.py" "$bin"
 	chmod +x "$bin"
 	dot

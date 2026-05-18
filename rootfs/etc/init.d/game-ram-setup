@@ -1,8 +1,6 @@
 #!/sbin/openrc-run
 # Populate Shell RPG runtime under tmpfs (/tmp) at boot.
 
-RAM_TOOLS=/usr/local/share/shell_rpg_engine_mpy/ram-tools.sh
-
 depend() {
 	need localmount
 	after localmount
@@ -13,19 +11,22 @@ start() {
 
 	rm -rf /tmp/game_map /tmp/bin /tmp/player.json /tmp/lib /tmp/usr
 
-	if [ -x /usr/local/share/shell_rpg_engine_mpy/install.sh ]; then
-		su user42 -s /bin/bash -c \
-			'cd /usr/local/share/shell_rpg_engine_mpy && ./install.sh engine.py' \
-			|| {
-				ewend 1 "install.sh failed"
-				return 1
-			}
+	if [ ! -x /usr/local/share/shell_rpg_engine_mpy/install.sh ]; then
+		ewend 1 "install.sh missing"
+		return 1
 	fi
 
-	if [ -r "$RAM_TOOLS" ]; then
-		# shellcheck disable=SC1090
-		. "$RAM_TOOLS"
-		ram_install_toolchain
+	if ! su user42 -s /bin/bash -c \
+		'cd /usr/local/share/shell_rpg_engine_mpy && ./install.sh engine.py' \
+		>>/tmp/game-ram-setup.log 2>&1; then
+		ewend 1 "install.sh failed (see /tmp/game-ram-setup.log)"
+		return 1
+	fi
+
+	if ! [ -d /tmp/game_map/village ] || ! [ -d /tmp/game_map/montagne ] || \
+		! [ -r /tmp/player.json ] || ! [ -x /tmp/bin/ls ]; then
+		ewend 1 "game map incomplete"
+		return 1
 	fi
 
 	eend 0

@@ -20,7 +20,8 @@ ln -s networking /etc/init.d/net.lo
 
 step 'Adjust rc.conf'
 sed -Ei \
-	-e 's/^[# ](rc_depend_strict)=.*/\1=NO/' \
+	-e 's/^[# ](rc_depend_strict)=.*/\1=YES/' \
+	-e 's/^[# ](rc_parallel)=.*/\1=NO/' \
 	-e 's/^[# ](rc_logger)=.*/\1=YES/' \
 	-e 's/^[# ](unicode)=.*/\1=YES/' \
 	/etc/rc.conf
@@ -37,11 +38,11 @@ addgroup user42 tty
 chown -R user42:user42 /home/user42/
 
 step 'Setup autologin'
-# hvc0: virtio console (v86 web). ttyS0: serial automation.
-sed -i 's|^ttyS0::.*|ttyS0::respawn:/sbin/agetty --autologin user42 -s ttyS0 115200 xterm|' /etc/inittab
-grep -q '^hvc0::' /etc/inittab || \
-	echo 'hvc0::respawn:/sbin/agetty --autologin user42 -s hvc0 115200 xterm' >> /etc/inittab
-sed 's@tty1::respawn:.*@@g' -i /etc/inittab
+# hvc0: user42 (game UI). ttyS0: root (serial / headless state quiesce). OpenRC after game-ram-setup.
+sed -i '/^hvc0::/d; /^ttyS0::/d; /^tty1::respawn:/d' /etc/inittab
+chmod +x /etc/init.d/agetty-hvc0 /etc/init.d/agetty-ttyS0
+rc-update add agetty-hvc0 default
+rc-update add agetty-ttyS0 default
 
 # hvc0 last so /dev/console and OpenRC logs go to virtio console.
 sed -Ei \

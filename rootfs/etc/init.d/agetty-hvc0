@@ -1,0 +1,13 @@
+#!/sbin/openrc-run
+
+name="agetty on hvc0"
+supervisor=supervise-daemon
+command="/sbin/agetty"
+command_args_foreground="--autologin user42 -s hvc0 115200 xterm"
+pidfile="/run/${RC_SVCNAME}.pid"
+respawn_period=60
+
+depend() {
+	need game-ram-setup game-vm-bridge
+	after game-ram-setup game-vm-bridge agetty-ttyS0
+}
