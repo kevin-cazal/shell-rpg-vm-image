@@ -1,4 +1,4 @@
-# cd hook: mlterm zone backgrounds and host bridge notifications.
+# cd hook: notify browser host of zone background changes (hvc1 vm-bridge).
 . /usr/local/share/shell_rpg_engine_mpy/zone-bg.sh
 
 cd() {
@@ -6,10 +6,5 @@ cd() {
 		set -- /tmp/game_map
 	fi
 	builtin cd "$@" || return
-	case "${TERM:-}" in
-		rxvt-unicode-256color|mlterm|mlterm-256color|xterm|xterm-256color)
-			_game_cd_set_bg_mlterm
-			;;
-	esac
 	_game_cd_notify_host
 }

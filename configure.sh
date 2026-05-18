@@ -63,22 +63,8 @@ fi
 chmod +x /usr/local/share/shell_rpg_engine_mpy/install.sh
 chmod +x /usr/local/share/shell_rpg_engine_mpy/vm-bridge-player-json.sh
 # install.sh runs at boot via game-ram-setup (RAM-backed /tmp/game_map).
+# Zone backgrounds and fonts live in the web runner (hvc0/xterm), not on disk.
 
-step 'Processing background images'
-mkdir -p /usr/local/share/bg
-for i in /usr/local/share/original_bg/*; do
-	[ -f "$i" ] || continue
-	magick "$i" -resize 320x240 -quality 95 -depth 8 \
-		-fill black -colorize 50% "/usr/local/share/bg/$(basename "$i")"
-done
-magick -size 320x240 xc:'#0a0a0a' /usr/local/share/bg/default.png
-rm -rf /usr/local/share/original_bg/
-
-step 'Refresh fontconfig cache'
-fc-cache -f /usr/share/fonts/dejavu /usr/share/fonts/twemoji 2>/dev/null || true
-
-step 'Remove build-only packages'
-apk del --purge imagemagick
 rm -rf /var/cache/apk/*
 
 cat > /etc/doas.conf <<-EOF
@@ -102,4 +88,4 @@ chmod 4755 /usr/local/bin/vm-bridge-listen
 chmod +x /usr/local/sbin/vm-bridge-daemon
 chmod +x /etc/init.d/game-vm-bridge
 rc-update add game-vm-bridge default
-rm -rf /tmp/game_map /tmp/bin /tmp/player.json /tmp/bg /tmp/lib /tmp/usr
+rm -rf /tmp/game_map /tmp/bin /tmp/player.json /tmp/lib /tmp/usr
