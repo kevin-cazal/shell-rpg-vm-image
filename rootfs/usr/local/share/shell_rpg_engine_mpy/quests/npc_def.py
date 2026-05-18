@@ -22,7 +22,18 @@ base = "/tmp/game_map"
 
 
 def _install_quiet():
-    return os.environ.get("INSTALL_QUIET", "") not in ("", "0", "false")
+    # MicroPython os has getenv, not environ (compat may wrap os).
+    v = ""
+    try:
+        v = os.getenv("INSTALL_QUIET", "") or ""
+    except AttributeError:
+        pass
+    if not v:
+        try:
+            v = os.environ.get("INSTALL_QUIET", "")
+        except AttributeError:
+            v = "1" if __name__ == "__main__" else ""
+    return str(v) not in ("", "0", "false", "None")
 
 
 def _progress():
