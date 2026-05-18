@@ -31,9 +31,6 @@ sed -Ei \
 step 'Enable services'
 rc-update add net.lo boot
 rc-update add termencoding boot
-rc-update add udev-trigger boot
-rc-update add udev-settle boot
-rc-update add udev-postmount boot
 
 step 'Create non-root user'
 adduser -D -s /bin/bash -h /home/user42 user42
