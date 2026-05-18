@@ -1,0 +1,86 @@
+name: Release VM artifacts
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout vm-image
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Checkout v86-runner
+        uses: actions/checkout@v4
+        with:
+          repository: kevin-cazal/v86-runner
+          path: v86-runner
+          ref: main
+
+      - name: Install system packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-utils zstd
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: v86-runner/package-lock.json
+
+      - name: Build disk image
+        run: |
+          sudo modprobe nbd max_part=16
+          export ALPINE_MAKE_VM_IMAGE="$GITHUB_WORKSPACE/alpine-make-vm-image/alpine-make-vm-image"
+          export IMAGE_SIZE=256M
+          export IMAGE="$GITHUB_WORKSPACE/alpine-bios-256M.img"
+          sudo -E "$GITHUB_WORKSPACE/build.sh"
+
+      - name: Build V86 state and bundle
+        working-directory: v86-runner
+        env:
+          VITE_VM_MEMORY_MB: "256"
+          V86_STATE_CONSOLE_COLS: "80"
+          V86_STATE_CONSOLE_ROWS: "24"
+        run: |
+          npm ci
+          npm run build-bundle -- \
+            --disk "$GITHUB_WORKSPACE/alpine-bios-256M.img" \
+            --state "$GITHUB_WORKSPACE/alpine-bios-256M.v86state" \
+            -o "$GITHUB_WORKSPACE/shell-rpg-256M.v86b"
+
+      - name: Resolve release tag
+        id: release_tag
+        run: |
+          if [ "${{ github.ref_type }}" = "tag" ]; then
+            echo "tag=${GITHUB_REF#refs/tags/}" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=build-${GITHUB_RUN_NUMBER}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.release_tag.outputs.tag }}
+          name: Release ${{ steps.release_tag.outputs.tag }}
+          make_latest: true
+          generate_release_notes: true
+          files: |
+            alpine-bios-256M.img
+            alpine-bios-256M.v86state
+            shell-rpg-256M.v86b

@@ -36,3 +36,26 @@ Requires a sibling [shell-rpg](https://github.com/kevin-cazal/shell-rpg) clone a
 Standalone: clone this repo and set `ALPINE_MAKE_VM_IMAGE`.
 
 As submodule of [shell-rpg](https://github.com/kevin-cazal/shell-rpg): use the umbrella `build.sh` instead.
+
+## Releases (CI)
+
+GitHub Actions builds disk + state + bundle on **version tags** (`v*`) or **workflow_dispatch**.
+
+```sh
+git tag v0.1.0 && git push origin v0.1.0
+```
+
+Or: Actions → **Release VM artifacts** → Run workflow.
+
+**Assets** (latest release):
+
+- `alpine-bios-256M.img`
+- `alpine-bios-256M.v86state`
+- `shell-rpg-256M.v86b` — [download](https://github.com/kevin-cazal/shell-rpg-vm-image/releases/latest/download/shell-rpg-256M.v86b)
+
+Local full build (root + sibling `v86-runner`):
+
+```sh
+git submodule update --init
+./scripts/build-release.sh
+```
