@@ -12,9 +12,6 @@ uname -a
 step 'Set up timezone'
 setup-timezone -z Europe/Paris
 
-step 'Set up default keymap'
-setup-keymap fr fr
-
 step 'Set up loopback only'
 cat > /etc/network/interfaces <<-EOF
 	iface lo inet loopback

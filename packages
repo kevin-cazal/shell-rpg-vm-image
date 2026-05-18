@@ -1,9 +1,7 @@
 tzdata
-kbd-bkeymaps
 bash
 busybox-extras
 less
 micropython
 agetty
 linux-firmware-none
-dialog
