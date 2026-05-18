@@ -14,13 +14,11 @@ setup-timezone -z Europe/Paris
 step 'Set up default keymap'
 setup-keymap fr fr
 
-step 'Set up networking'
+step 'Set up loopback only'
 cat > /etc/network/interfaces <<-EOF
 	iface lo inet loopback
-	iface eth0 inet dhcp
 EOF
 ln -s networking /etc/init.d/net.lo
-ln -s networking /etc/init.d/net.eth0
 
 step 'Adjust rc.conf'
 sed -Ei \
@@ -30,8 +28,6 @@ sed -Ei \
 	/etc/rc.conf
 
 step 'Enable services'
-rc-update add chronyd default
-rc-update add net.eth0 default
 rc-update add net.lo boot
 rc-update add termencoding boot
 rc-update add udev-trigger boot
