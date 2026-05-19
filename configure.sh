@@ -69,7 +69,15 @@ if [ -f /etc/fstab ]; then
 	if ! grep -qE '[[:space:]]/tmp[[:space:]]' /etc/fstab; then
 		printf '%s\n' 'tmpfs	/tmp	tmpfs	mode=1777,size=32M	0	0' >> /etc/fstab
 	fi
+	# virtio-9p host share (browser handle9p); not the root filesystem.
+	if ! grep -qE '[[:space:]]/mnt/host[[:space:]]' /etc/fstab; then
+		printf '%s\n' 'host9p	/mnt/host	9p	trans=virtio,version=9p2000.L	0	0' >> /etc/fstab
+	fi
 fi
+mkdir -p /mnt/host
+# Load before fstab localmount so host9p can attach (see /etc/fstab).
+mkdir -p /etc/modules-load.d
+printf '%s\n' 9p 9pnet_virtio > /etc/modules-load.d/host9p.conf
 chmod +x /etc/init.d/game-ram-setup
 rc-update add game-ram-setup boot
 chmod 4755 /usr/local/bin/vm-bridge-send
