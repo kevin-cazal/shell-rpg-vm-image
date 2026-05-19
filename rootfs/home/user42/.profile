@@ -146,7 +146,7 @@ esac
 case "$(tty)" in
 /dev/hvc0)
 	cd /tmp/game_map
-	[ -r /tmp/player.json ] && \
-		/usr/local/share/shell_rpg_engine_mpy/vm-bridge-player-json.sh 2>/dev/null || true
+	[ -r /tmp/player.json ] && [ -d /mnt/host ] && \
+		cp /tmp/player.json /mnt/host/player.json 2>/dev/null || true
 	;;
 esac

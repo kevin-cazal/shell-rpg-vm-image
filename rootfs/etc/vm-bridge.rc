@@ -1,1 +1,1 @@
-# Host→guest commands (optional). player.json is pushed by the game engine, not pulled here.
+# Host→guest commands (optional). Player state is mirrored to /mnt/host/player.json via host9p.

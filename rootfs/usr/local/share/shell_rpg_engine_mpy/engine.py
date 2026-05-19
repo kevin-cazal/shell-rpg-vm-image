@@ -25,13 +25,12 @@ if not os.path.exists(target_config) and os.path.exists(source_config):
     compat.copyfile(source_config, target_config)
 
 PLAYER_FILE = '/tmp/player.json'
-_HOST_PUSH_SCRIPT = '/usr/local/share/shell_rpg_engine_mpy/vm-bridge-player-json.sh'
+HOST_MIRROR_FILE = '/mnt/host/player.json'
 
 
-def _push_player_json_to_host():
+def _mirror_player_json_to_host():
     try:
-        if os.stat(_HOST_PUSH_SCRIPT)[0] & 0o111:
-            os.system(_HOST_PUSH_SCRIPT + ' >/dev/null 2>&1')
+        compat.copyfile(PLAYER_FILE, HOST_MIRROR_FILE)
     except OSError:
         pass
 
@@ -191,7 +190,7 @@ class Player:
                 'commands': self.commands,
                 'stories': self.stories
             }, f)
-        _push_player_json_to_host()
+        _mirror_player_json_to_host()
 
     def load(self):
         try:
