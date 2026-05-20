@@ -145,6 +145,7 @@ esac
 
 case "$(tty)" in
 /dev/hvc0)
+	/usr/local/sbin/mount-host-share 2>/dev/null || true
 	cd /tmp/game_map
 	if mountpoint -q /mnt/host 2>/dev/null; then
 		[ -r /tmp/player.json ] && \

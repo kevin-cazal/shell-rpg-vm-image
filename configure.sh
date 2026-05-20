@@ -68,15 +68,14 @@ if [ -f /etc/fstab ]; then
 	if ! grep -qE '[[:space:]]/tmp[[:space:]]' /etc/fstab; then
 		printf '%s\n' 'tmpfs	/tmp	tmpfs	mode=1777,size=32M	0	0' >> /etc/fstab
 	fi
-	# virtio-9p host share (browser handle9p); not the root filesystem.
-	if ! grep -qE '[[:space:]]/mnt/host[[:space:]]' /etc/fstab; then
-		printf '%s\n' 'host9p	/mnt/host	9p	trans=virtio,version=9p2000.L	0	0' >> /etc/fstab
-	fi
+	# host9p is mounted at runtime (mount-host9p / mount-host-share), not via fstab:
+	# v86 save_state keeps the guest mount but not the browser VFS — fstab mount + resume breaks.
 fi
 mkdir -p /mnt/host
-# Load before fstab localmount so host9p can attach (see /etc/fstab).
+# Load 9p modules before mount-host9p (OpenRC boot).
 mkdir -p /etc/modules-load.d
 printf '%s\n' 9p 9pnet_virtio > /etc/modules-load.d/host9p.conf
+chmod 4755 /usr/local/sbin/mount-host-share
 chmod +x /etc/init.d/mount-host9p
 chmod +x /etc/init.d/game-ram-setup
 rc-update add mount-host9p boot

@@ -9,17 +9,12 @@ depend() {
 start() {
 	ebegin "Mount host9p at /mnt/host"
 
-	if mountpoint -q /mnt/host 2>/dev/null; then
-		eend 0
-		return 0
-	fi
-
 	modprobe 9pnet_virtio 2>/dev/null
 	modprobe 9p 2>/dev/null
 
 	_tries=0
 	while [ "$_tries" -lt 60 ]; do
-		if mount -t 9p -o trans=virtio,version=9p2000.L host9p /mnt/host 2>/dev/null; then
+		if /usr/local/sbin/mount-host-share 2>/dev/null; then
 			eend 0
 			return 0
 		fi
