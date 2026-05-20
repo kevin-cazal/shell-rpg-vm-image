@@ -56,6 +56,10 @@ if [ ! -x /usr/local/bin/rpg-inject-tty ]; then
 	echo "rpg-inject-tty missing: run rpg-inject-tty/build.sh before building the image" >&2
 	exit 1
 fi
+if [ ! -x /usr/local/sbin/mount-host-share ]; then
+	echo "mount-host-share missing: run mount-host-share/build.sh before building the image" >&2
+	exit 1
+fi
 chmod +x /usr/local/share/shell_rpg_engine_mpy/install.sh
 # install.sh runs at boot via game-ram-setup (RAM-backed /tmp/game_map).
 # Zone backgrounds and fonts live in the web runner (hvc0/xterm), not on disk.
@@ -75,7 +79,6 @@ mkdir -p /mnt/host
 # Load 9p modules before mount-host9p (OpenRC boot).
 mkdir -p /etc/modules-load.d
 printf '%s\n' 9p 9pnet_virtio > /etc/modules-load.d/host9p.conf
-chmod 4755 /usr/local/sbin/mount-host-share
 chmod +x /etc/init.d/mount-host9p
 chmod +x /etc/init.d/game-ram-setup
 rc-update add mount-host9p boot

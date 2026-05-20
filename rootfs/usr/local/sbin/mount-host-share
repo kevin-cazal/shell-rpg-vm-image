@@ -1,7 +1,0 @@
-#!/bin/sh
-# (Re)mount virtio-9p host9p at /mnt/host. Stale mounts from v86 save_state must be
-# dropped first — host VFS is not in the snapshot.
-mountpoint -q /mnt/host 2>/dev/null && umount /mnt/host 2>/dev/null
-modprobe 9pnet_virtio 2>/dev/null
-modprobe 9p 2>/dev/null
-exec mount -t 9p -o trans=virtio,version=9p2000.L host9p /mnt/host

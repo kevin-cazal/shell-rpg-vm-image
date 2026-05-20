@@ -14,6 +14,7 @@ Zone backgrounds are **not** in this repo — see `assets/zone-bg/` in [shell-rp
 ```sh
 ./rpg-inject-tty/build.sh
 ./vm-bridge-send/build.sh
+./mount-host-share/build.sh
 doas ./build.sh
 ```
 
