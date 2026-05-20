@@ -40,14 +40,11 @@ ram_install_busybox_bin() {
 	_bb=/bin/busybox
 	[ -x "$_bb" ] || return 0
 	mkdir -p /tmp/bin
-	cp -f "$_bb" /tmp/bin/busybox
-	chmod 755 /tmp/bin/busybox
-	if [ -n "${INSTALL_QUIET:-}" ] && [ "${INSTALL_QUIET}" != 0 ]; then
-		printf .
-	fi
-	ram_copy_libs_for "$_bb"
+	# Wrappers call /bin/busybox so 9p (/mnt/host) and rootfs both work.
+	# A copied busybox + partial /tmp/lib breaks listing host9p for user42.
 	for _applet in ls cat mkdir mv cp sort whoami pwd chmod less ln rm; do
-		ln -sf busybox "/tmp/bin/$_applet"
+		printf '%s\n' '#!/bin/sh' "exec $_bb $_applet \"\$@\"" >"/tmp/bin/$_applet"
+		chmod 755 "/tmp/bin/$_applet"
 		if [ -n "${INSTALL_QUIET:-}" ] && [ "${INSTALL_QUIET}" != 0 ]; then
 			printf .
 		fi

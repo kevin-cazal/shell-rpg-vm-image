@@ -146,7 +146,9 @@ esac
 case "$(tty)" in
 /dev/hvc0)
 	cd /tmp/game_map
-	[ -r /tmp/player.json ] && [ -d /mnt/host ] && \
-		cp /tmp/player.json /mnt/host/player.json 2>/dev/null || true
+	if mountpoint -q /mnt/host 2>/dev/null; then
+		[ -r /tmp/player.json ] && \
+			cp /tmp/player.json /mnt/host/player.json 2>/dev/null || true
+	fi
 	;;
 esac

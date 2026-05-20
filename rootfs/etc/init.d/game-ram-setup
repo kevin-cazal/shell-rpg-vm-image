@@ -2,8 +2,8 @@
 # Populate Shell RPG runtime under tmpfs (/tmp) at boot.
 
 depend() {
-	need localmount
-	after localmount
+	need localmount mount-host9p
+	after localmount mount-host9p
 }
 
 start() {

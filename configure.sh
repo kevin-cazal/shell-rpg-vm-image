@@ -77,7 +77,9 @@ mkdir -p /mnt/host
 # Load before fstab localmount so host9p can attach (see /etc/fstab).
 mkdir -p /etc/modules-load.d
 printf '%s\n' 9p 9pnet_virtio > /etc/modules-load.d/host9p.conf
+chmod +x /etc/init.d/mount-host9p
 chmod +x /etc/init.d/game-ram-setup
+rc-update add mount-host9p boot
 rc-update add game-ram-setup boot
 chmod 4755 /usr/local/bin/vm-bridge-send
 chmod 4755 /usr/local/bin/vm-bridge-raw
