@@ -57,7 +57,7 @@ if [ ! -x /usr/local/bin/rpg-inject-tty ]; then
 	exit 1
 fi
 chmod +x /usr/local/share/shell_rpg_engine_mpy/install.sh
-chmod +x /usr/local/share/shell_rpg_engine_mpy/vm-bridge-player-json.sh
+chmod +x /usr/local/share/shell_rpg_engine_mpy/export-player-json.sh
 # install.sh runs at boot via game-ram-setup (RAM-backed /tmp/game_map).
 # Zone backgrounds and fonts live in the web runner (hvc0/xterm), not on disk.
 
@@ -84,6 +84,7 @@ chmod 4755 /usr/local/bin/vm-bridge-send
 chmod 4755 /usr/local/bin/vm-bridge-raw
 chmod 4755 /usr/local/bin/vm-bridge-read
 chmod 4755 /usr/local/bin/vm-bridge-listen
+chmod 4755 /usr/local/sbin/mount-host-share
 chmod +x /usr/local/sbin/vm-bridge-daemon
 chmod +x /etc/init.d/game-vm-bridge
 rc-update add game-vm-bridge default

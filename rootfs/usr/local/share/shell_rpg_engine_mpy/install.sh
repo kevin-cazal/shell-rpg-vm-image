@@ -50,7 +50,7 @@ cat > /tmp/player.json << EOF
 EOF
 dot
 
-/usr/local/share/shell_rpg_engine_mpy/vm-bridge-player-json.sh 2>/dev/null || true
+/usr/local/share/shell_rpg_engine_mpy/export-player-json.sh || true
 dot
 
 . "$(dirname "$0")/ram-tools.sh"

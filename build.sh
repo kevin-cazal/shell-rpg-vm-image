@@ -40,6 +40,7 @@ fi
 
 "$SCRIPT_DIR/rpg-inject-tty/build.sh"
 "$SCRIPT_DIR/vm-bridge-send/build.sh"
+"$SCRIPT_DIR/mount-host-share/build.sh"
 
 rm -f "$IMAGE"
 
