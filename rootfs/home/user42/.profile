@@ -3,11 +3,34 @@ INTRO_TEXT="
 / ___|| | | | ____| |   | |     |  _ \|  _ \ / ___|
 \___ \| |_| |  _| | |   | |     | |_) | |_) | |  _ 
  ___) |  _  | |___| |___| |___  |  _ <|  __/| |_| |
-|____/|_| |_|_____|_____|_____| |_| \_\_|    \____|
+|____/|_| |_|_____|_____|_____| |_| \_\_|    \____/
 
-Une aventure au terminal.
-Explorez les zones, parlez aux PNJ,
-progressez dans l'histoire."
+🎮 Bienvenue dans une aventure au terminal.
+🗺️ Explorez les zones, parlez aux personnages, et 📖 progressez dans l'histoire.
+
+📁 Chaque dossier représente une zone du monde.
+Utilisez la commande 👀 ls pour voir ce qu'elle contient, puis 🚶 cd <zone> pour vous y déplacer.
+Les fichiers 👤 .npc sont des personnages : parlez-leur avec 💬 talk <fichier>.
+Les fichiers 📦 .obj sont des objets ; lisez vos quêtes pour savoir comment les utiliser.
+
+💡 Conseils :
+- 💾 Sauvegardez régulièrement via Menu > Save memory… (en haut à droite). Certaines actions sont irréversibles !
+- 📂 Pour reprendre une partie, utilisez Menu > Load memory….
+- 🔄 Rafraîchir la page du navigateur réinitialise l'aventure.
+  ⚠️ Si vous quittez ou rechargez sans sauvegarder, vous perdez votre progression.
+- 🚶 Si vous vous éloignez de la zone de jeu, tapez cd sans argument pour revenir au départ.
+- 🧑 La commande player affiche votre statut et vos quêtes.
+- 🎭 Plusieurs fins sont possibles selon vos choix.
+- 🚪 La commande exit réaffiche ce texte d'introduction.
+
+🛣️ Vous vous réveillez sur une route, presque sans souvenirs.
+Voici les commandes que vous retenez encore :
+🚶 cd <zone> pour entrer dans une zone,
+↩️ cd .. pour revenir en arrière,
+👀 ls pour regarder autour de vous,
+💬 talk <pnj> pour parler à un personnage,
+🧑 player pour vos informations.
+"
 
 export PATH=/tmp/bin:$PATH
 [ -d /tmp/lib ] && export LD_LIBRARY_PATH="/tmp/lib${LD_LIBRARY_PATH:+:}$LD_LIBRARY_PATH"
