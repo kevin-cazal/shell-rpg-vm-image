@@ -71,6 +71,23 @@ jobs:
             --state "$GITHUB_WORKSPACE/alpine-bios-256M.v86state" \
             -o "$GITHUB_WORKSPACE/shell-rpg-256M.v86b"
 
+      - name: Upload v86b to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          aws s3 cp shell-rpg-256M.v86b s3://epitech/shell-rpg-256M.v86b \
+            --endpoint-url "${{ secrets.R2_S3_ENDPOINT }}" \
+            --content-type application/octet-stream \
+            --cache-control "public, max-age=3600"
+
+      - name: Verify public access
+        run: |
+          url="${{ secrets.R2_PUBLIC_BASE_URL }}/shell-rpg-256M.v86b"
+          curl -fsSI "$url" | grep -E "HTTP/|content-type:"
+          curl -fsS -r 0-1023 "$url" | wc -c | grep -q "^1024$"
+
       - name: Resolve release tag
         id: release_tag
         run: |
