@@ -382,4 +382,7 @@ ACTIONS = {
 }
 
 if __name__ == "__main__":
-    ACTIONS[os.path.basename(sys.argv[0])](sys.argv[1:])
+    try:
+        ACTIONS[os.path.basename(sys.argv[0])](sys.argv[1:])
+    except Exception:
+        print("Action impossible")
