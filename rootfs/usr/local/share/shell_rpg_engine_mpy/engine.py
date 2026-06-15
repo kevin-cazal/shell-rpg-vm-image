@@ -385,4 +385,4 @@ if __name__ == "__main__":
     try:
         ACTIONS[os.path.basename(sys.argv[0])](sys.argv[1:])
     except Exception:
-        print("Action impossible")
+        ui.notify("system", "Action impossible")
