@@ -264,17 +264,14 @@ class Shortcut(QuestValidation): # Quest giver: Guard, Location: dungeon
         symlink_to_village = None
         for file in os.listdir(dungeon_path):
             abspath = f"/{donjon_path}/{file}"
-            # print(abspath)
-            if (os.path.exists(abspath) and os.path.islink(abspath) and os.path.isdir(abspath)):
-                try:
-                    original_path = os.readlink(abspath)
-                    # print("Original path: ", original_path)
-                    # print(f"chemin: /{base}/{village_path}")
-                    if os.path.samefile(original_path, f"/{village_path}"):
-                        symlink_to_village = abspath
-                        break
-                except:
-                    continue
+            try:                                                     
+                potential_link = os.system(f"readlink -f {abspath}")     
+                target_path = os.system(f"readlink -f /{village_path}")       
+                if potential_link == target_path:                    
+                    symlink_to_village = abspath                                    
+                    break                                                                
+            except:                                                                                          
+                continue
         if symlink_to_village:
             return True, f"Vous avez créé un raccourci vers le {village_path} !"
         else:
