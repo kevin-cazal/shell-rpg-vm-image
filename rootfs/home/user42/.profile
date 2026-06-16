@@ -22,15 +22,20 @@ Les fichiers 📦 .obj sont des objets ; lisez vos quêtes pour savoir comment l
 - 🧑 La commande player affiche votre statut et vos quêtes.
 - 🎭 Plusieurs fins sont possibles selon vos choix.
 - 🚪 La commande exit réaffiche ce texte d'introduction.
-
-🛣️ Vous vous réveillez sur une route, presque sans souvenirs.
-Voici les commandes que vous retenez encore :
-🚶 cd <zone> pour entrer dans une zone,
-↩️ cd .. pour revenir en arrière,
-👀 ls pour regarder autour de vous,
-💬 talk <pnj> pour parler à un personnage,
-🧑 player pour vos informations.
 "
+
+TUTO_TEXT="🛣️ Vous vous réveillez sur une route, presque sans souvenirs.
+Voici les commandes dont vous vous souvenez encore :
+👀 pour regarder autour de vous, tapez: ls
+🚶 pour entrer dans une zone, tapez: cd <zone>
+↩️ pour revenir en arrière, tapez: cd ..
+💬 pour parler à un personnage, tapez: talk <pnj>
+🧑 pour afficher votre statut et vos quêtes, tapez: player
+💡 pour revoir ce texte, tapez: tuto"
+
+tuto() {
+	echo "$TUTO_TEXT"
+}
 
 export PATH=/tmp/bin:$PATH
 [ -d /tmp/lib ] && export LD_LIBRARY_PATH="/tmp/lib${LD_LIBRARY_PATH:+:}$LD_LIBRARY_PATH"
@@ -162,6 +167,8 @@ EOF
 	printf "\033[?25h"
 	stty echo
 	trap - INT
+	clear
+	tuto
 
 	;;
 esac
